@@ -23,7 +23,9 @@ x_hat = x0;
 
 %create local symbolic x vector
 m = length(x0);
+
 x = sym('x',[m,1],'real');
+% assume(x,'real');
 
 %Compute J
 J = (z - double(subs(h,x,x_hat)))'*Q*(z - double(subs(h,x,x_hat)));
@@ -48,11 +50,11 @@ while(norm(dX) >= tol && ii <= maxIter)
     %check to see if H'*H is psd
     HTH = H'*H;
     eigH = eig(HTH);
-    test = min(eigH > 0.01);
+    test = max(eigH > 0);
     
     %change lambda if H'*H is NOT psd
     if ~test
-        lamb = norm(H,'fro')*.001;
+        lamb = norm(H,'fro')*.001
     end
     
     %compute dX
