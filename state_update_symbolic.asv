@@ -65,14 +65,9 @@ V = z - g;
 %create vector h
 h = [V; dp];
 
-%create dC vector
-dC = [dT_C; reshape(dR_C,9,1)];
-
 %Compute Jacobian of h
 H_mu = jacobian(h,dp);
-H_C = jacobian(h,dC);
-
-H = [H_mu H_C]
+H_C = jaco
 
 
 % %compute cost function E
