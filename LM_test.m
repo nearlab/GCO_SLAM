@@ -37,7 +37,8 @@ disp('Initial Performance')
 norm(x0 - x_true)
 
 %look at matlab default performance
-X = lsqnonlin(@(y)(z-[sin(y(1)); cos(y(2)) + y(3)^2]),x0);
+fun = @(y)(z-[sin(y(1)); cos(y(2)) + y(3)^2]);
+X = lsqnonlin(fun,x0);
 
 disp('Default Performance')
 norm(X - x_true)

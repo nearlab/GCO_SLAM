@@ -16,8 +16,8 @@ R = eye(2); %sym('R',[2 2],'real');
 I = eye(3); %sym('I',[3 3],'real');
 
 %Camera pose
-R_C = eye(3); % sym('R',[3 3],'real');
-T_C = [0 0 0]'; % sym('T',[3 1],'real');
+R_C = sym('R',[3 3],'real');
+T_C = sym('T',[3 1],'real');
 
 %inhomogenous world coordinates
 syms X Y Z 'real'
@@ -27,10 +27,6 @@ X_W = [X Y Z 1]';
 syms dX dY dZ 'real'
 dX_W = [dX dY dZ 0]';
 
-%change in camera pose
-dT_C = sym('dT',[3 1],'real');
-dR_C = sym('dR',[3 3],'real');
-
 %camera calibration matrix
 syms f px py 'real'
 K = [f 0 px;
@@ -38,7 +34,7 @@ K = [f 0 px;
     0 0 1];
 
 %calculate g
-g = K*[R_C*dR_C, T_C + dT_C]*(X_W + dX_W);
+g = K*[eye(3), T_C]*(X_W);
 g = g(1:2)/g(3);
 
 %create homogenous world coordinates
@@ -62,31 +58,8 @@ g = subs(g,dZ,1/dq);
 %compute vector V
 V = z - g;
 
-%create vector h
-h = [V; dp];
+%save g
+save('cameraMap','g')
 
-%create dC vector
-dC = [dT_C; reshape(dR_C,9,1)];
-
-%Compute Jacobian of h
-H_mu = jacobian(h,dp);
-H_C = jacobian(h,dC);
-
-H = [H_mu H_C]
-
-
-% %compute cost function E
-% E = V'*R*V + dp'*I*dp;
-% 
-% %calculate some hessians
-% H_ss = hessian(E,dp);
-% 
-% %substitute real values into jacobian
-% H_ss = subs(H_ss,f,1000);
-% H_ss = subs(H_ss,px,960);
-% H_ss = subs(H_ss,py,480);
-% 
-% [u_num, v_num, q_num] = cart2invdept(1,1,1);
-% H_ss = subs(H_ss,u,u_num);
-% H_ss = subs(H_ss,v,v_num);
-% H_ss = subs(H_ss,q,q_num);
+%compute h_prime (onedrive notes)
+h_p = [g; -dp]

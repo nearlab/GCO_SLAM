@@ -27,11 +27,11 @@ for ii = 1:N
     z(:,ii) = K*[R t]*[X(:,ii)' 1]';
     I(:,ii) = z(1:2, ii)/z(3, ii);
 
-    %elimate points which are outside of the camera frame
-    if (I(1,ii) > 2*K(1,3)) || (I(2,ii) > 2*K(2,3)) || ...
-            (I(1,ii) < 0) || (I(2,ii) < 0)
-        I(1:2,ii) = [NaN NaN]';
-    end
+%     %elimate points which are outside of the camera frame
+%     if (I(1,ii) > 2*K(1,3)) || (I(2,ii) > 2*K(2,3)) || ...
+%             (I(1,ii) < 0) || (I(2,ii) < 0)
+%         I(1:2,ii) = [NaN NaN]';
+%     end
 
     
 end
