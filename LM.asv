@@ -37,10 +37,10 @@ ii = 1;
 %compute jacobian of h
 H_sym = jacobian(h);
 
-pChange = tol + 1;
+dX = tol + 1;
     
 %begin loop
-while(pChange >= tol && ii <= maxIter)
+while(norm(dX) >= tol && ii <= maxIter)
     
     %evaluate jacobian at current x estimate
     H = double(subs(H_sym,x,x_hat));
@@ -61,9 +61,6 @@ while(pChange >= tol && ii <= maxIter)
     %compute dX
     dX = (HTH + lamb*eye(m))\H'*(z - double(subs(h,x,x_hat)));
     
-    %Compute J
-    J = (z - double(subs(h,x,x_hat)))'*Q*(z - double(subs(h,x,x_hat)));
-    
     %Compute J_new
     J_new = (z - double(subs(h,x,x_hat+dX)))'*Q*(z - double(subs(h,x,x_hat+dX)));
     
@@ -83,9 +80,6 @@ while(pChange >= tol && ii <= maxIter)
         ii = ii + 1;
         
     end
-    
-    %calculate percent change
-    pChange = norm((x_hat - dX)./x_hat);
     
     %accept new x value
     x_hat = x_hat + dX;

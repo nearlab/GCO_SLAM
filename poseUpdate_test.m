@@ -1,26 +1,26 @@
 clear
 close all
-clc
+% clc
 
 %initialize 3 points in cartesian space
-% X = [0 0 0;
-%     .1 0 -.1;
-%     1 1 1];
+X = [0 0 0;
+    .1 0 -.1;
+    1 1 1];
 
 % X = [0 0;
 %     -.2 0.1;
 %     1 1];
 
-X = [0 0 1]';
+% X = [0 0 1]';
 
 %number of points
 N = size(X,2);
 
 %Camera properties
 %Resolution = 1280x960
-f_num = 1; %camera focal length
-p1_num = 0; %principal point x
-p2_num = 0; %principal point y
+f_num = 1000; %camera focal length
+p1_num = 640; %principal point x
+p2_num = 480; %principal point y
 s = 0; %skew
 
 K = [f_num s p1_num;
@@ -33,11 +33,12 @@ R = eye(3);
 %camera position (true)
 pos = [.01 .01 0]';
 
-I = imageGen(X,pos,R,K)
+I = imageGen(X,pos,R,K);
 
-% figure
-% scatter(I(1,:),I(2,:))
-% axis([0 1280 0 960])
+figure
+scatter(I(1,:),I(2,:))
+axis([0 1280 0 960])
+hold on
 
 %convert to inverse depth coordinates
 for ii = 1:N
@@ -45,10 +46,10 @@ for ii = 1:N
 end
 
 %initialize initial guess of X, X0
-X0 = X;% + .0001*randn(size(X));
+X0 = X + .001*randn(size(X));
 
 %initialize initial guess of pos, pos0
-pos0 = pos;% + .0001*randn(size(pos));
+pos0 = pos + .001*randn(size(pos));
 
 %create measurement noise inverse
 Rinv = eye(2*N);
@@ -60,7 +61,7 @@ Info = 0*eye(3*N);
 Q = blkdiag(Rinv,Info);
 
 %initial x0 vector for algorithm
-x0 = [pos0; X0];
+x0 = [pos0; zeros(3*N,1)];
 
 %create measurement, z
 z = [reshape(I,2*N,1); zeros(3*N,1)];
@@ -73,8 +74,7 @@ x = sym('x',[M,1],'real');
 
 %calculate g
 syms x1 x2 x3 xC yC zC 'real'
-g = K*[eye(3), [x1 x2 x3]']*([xC yC zC 1]');
-g = g(1:2)/g(3);
+g = imageGen([xC yC zC]',[x1 x2 x3]',eye(3),K);
 
 %create homogenous world coordinates
 syms u v q 'real'
@@ -88,7 +88,7 @@ g = subs(g,zC,1/q);
 h = [];
 
 %reshape initial guess of structure
-X0_R = 0*reshape(X0,3*N,1);
+X0_R = reshape(X0,3*N,1);
 
 for ii = 1:N
     
@@ -111,7 +111,7 @@ maxIter = 1000;
 J = (z - double(subs(h,x,x0)))'*Q*(z - double(subs(h,x,x0)));
 
 %perform LM
-[x_hat, ii] = LM(z, h, x0, Q, tol, maxIter)
+[x_hat, iters, J_out] = LM(z, h, x0, Q, tol, maxIter)
 
 %caculate final cost
 J = (z - double(subs(h,x,x_hat)))'*Q*(z - double(subs(h,x,x_hat)));
@@ -126,9 +126,8 @@ for ii = 1:N
     [X_hat(1,ii), X_hat(2,ii), X_hat(3,ii)] = invdept2cart(X_hat(1,ii), X_hat(2,ii), X_hat(3,ii));
 end
 
-% I_hat = imageGen(X_hat,pos_hat,R,K)
-% h = matlabFunction(z-h);
-% lsqnonlin(h,x0(1), x0(2), x0(3), x0(4), x0(5), x0(6))
+I_hat = imageGen(X_hat,pos_hat,R,K);
+scatter(I_hat(1,:),I_hat(2,:))
 
 
 

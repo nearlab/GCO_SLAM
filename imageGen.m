@@ -15,10 +15,10 @@ function [I] = imageGen(X, pos, R, K)
 N = size(X,2);
 
 %initialize z for homogenous coordinates
-z = zeros(3,N);
+% z = zeros(3,N);
 
 %initialize I (inhomogenous coordinates)
-I = zeros(2,N);
+% I = zeros(2,N);
 
 %create t (vector from camera to world center in camera frame)
 t = -R*pos;
