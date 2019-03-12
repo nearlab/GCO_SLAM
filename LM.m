@@ -1,4 +1,4 @@
-function [x_hat, ii, J_out] = LM(z, h, x0, Q, tol, maxIter)
+function [x_hat, ii, J_out, pChange] = LM(z, h, x0, Q, tol, maxIter)
 % Levenberg-Marquart Nonlinear Optimization
 % Based on algorithm from Humphrey's Course Notes for Estimation
 % 
@@ -18,6 +18,7 @@ function [x_hat, ii, J_out] = LM(z, h, x0, Q, tol, maxIter)
 % x_hat - mx1 estimated x values
 % ii - iterations required for convergence
 % J - cost at each iteration
+% pChange - percent change of the final output
 
 %initialize x_hat
 x_hat = x0;
@@ -42,9 +43,10 @@ pChange = tol + 1;
 %begin loop
 while(pChange >= tol && ii <= maxIter)
     
+    tic
     %evaluate jacobian at current x estimate
     H = double(subs(H_sym,x,x_hat));
-    
+    toc
     %initialize lambda
     lamb = 0;
     
@@ -58,8 +60,10 @@ while(pChange >= tol && ii <= maxIter)
         lamb = norm(H,'fro')*.001;
     end
     
+ 
     %compute dX
     dX = (HTH + lamb*eye(m))\H'*(z - double(subs(h,x,x_hat)));
+
     
     %Compute J
     J = (z - double(subs(h,x,x_hat)))'*Q*(z - double(subs(h,x,x_hat)));
@@ -73,8 +77,10 @@ while(pChange >= tol && ii <= maxIter)
         %compute new lambda
         lamb = max([2*lamb, norm(H,'fro')*.001]);
         
+
         %compute dX
         dX = (HTH + lamb*eye(m))\H'*(z - double(subs(h,x,x_hat)));
+    
         
         %Compute J_new
         J_new = (z - double(subs(h,x,x_hat+dX)))'*Q*(z - double(subs(h,x,x_hat+dX)));
@@ -91,7 +97,7 @@ while(pChange >= tol && ii <= maxIter)
     x_hat = x_hat + dX;
     
     %increment ii
-    ii = ii + 1
+    ii = ii + 1;
     
     %add J_out
     J_out = [J_out J_new];

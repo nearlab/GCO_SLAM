@@ -55,7 +55,7 @@ pos0 = pos + .001*randn(size(pos));
 Rinv = eye(2*N);
 
 %create position information matrix
-Info = 0*eye(3*N);
+Info = eye(3*N);
 
 %create LS weight matrix
 Q = blkdiag(Rinv,Info);
@@ -105,7 +105,7 @@ h = [h; -1*x(4:end)];
 
 %LM tolerance
 tol = 1E-10;
-maxIter = 1000;
+maxIter = 100;
 
 %calculate initial cost
 J = (z - double(subs(h,x,x0)))'*Q*(z - double(subs(h,x,x0)));

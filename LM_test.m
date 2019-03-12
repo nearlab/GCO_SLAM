@@ -15,6 +15,9 @@ x = [x1 x2 x3]';
 %create function
 h = [sin(x1); cos(x2) + x3^2];
 
+% %blow up the size of h
+% h = [h' h' h' h' h' h' h' h']';
+
 %create truth
 x_true = [1 2 3]';
 
@@ -28,18 +31,18 @@ Q = eye(length(z));
 x0 = x_true + .01*randn(3,1);
 
 %call function
-[x_hat, ii] = LM(z, h, x0, Q, tol, maxIter);
+[x_hat, ii, J_out, pChange] = LM(z, h, x0, Q, tol, maxIter);
 
 disp('LM Performance')
 norm(x_hat - x_true)
 
 disp('Initial Performance')
 norm(x0 - x_true)
-
-%look at matlab default performance
-fun = @(y)(z-[sin(y(1)); cos(y(2)) + y(3)^2]);
-X = lsqnonlin(fun,x0);
-
-disp('Default Performance')
-norm(X - x_true)
+% 
+% %look at matlab default performance
+% fun = @(y)(z-[sin(y(1)); cos(y(2)) + y(3)^2]);
+% X = lsqnonlin(fun,x0);
+% 
+% disp('Default Performance')
+% norm(X - x_true)
 
