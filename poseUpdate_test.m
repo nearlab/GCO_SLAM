@@ -2,10 +2,11 @@ clear
 close all
 clc
 
-%initialize 3 points in cartesian space
-X = [0 0 0;
-    .1 0 -.1;
-    1 1 1];
+%initialize N points in cartesian space
+N = 100;
+
+X = [.1*randn(2,N);
+    .1*randn(1,N)+1];
 
 % X = [0 0;
 %     -.2 0.1;
@@ -13,8 +14,6 @@ X = [0 0 0;
 
 % X = [0 0 1]';
 
-%number of points
-N = size(X,2);
 
 %Camera properties
 %Resolution = 1280x960
@@ -40,10 +39,10 @@ scatter(I(1,:),I(2,:))
 axis([0 1280 0 960])
 hold on
 
-% %convert to inverse depth coordinates
-% for ii = 1:N
-%     [X(1,ii), X(2,ii), X(3,ii)] = cart2invdept(X(1,ii), X(2,ii), X(3,ii));
-% end
+%convert to inverse depth coordinates
+for ii = 1:N
+    [X(1,ii), X(2,ii), X(3,ii)] = cart2invdept(X(1,ii), X(2,ii), X(3,ii));
+end
 
 %initialize initial guess of X, X0
 X0 = X + .01*randn(size(X));
@@ -51,14 +50,14 @@ X0 = X + .01*randn(size(X));
 %initialize initial guess of pos, pos0
 pos0 = pos + .01*randn(size(pos));
 
-%create measurement noise inverse
-Rinv = eye(2*N);
+%create measurement noise inverse diagonals
+Rinv = 100*ones(1,2*N);
 
-%create position information matrix
-Info = eye(3*N);
+%create position information matrix diagonals
+Info = 0*ones(1,3*N);
 
-%create LS weight matrix
-Q = blkdiag(Rinv,Info);
+%create LS weight matrix diagonal
+Q = [Rinv, Info];
 
 %initial x0 vector for algorithm
 x0 = [pos0; zeros(3*N,1)];
@@ -115,30 +114,56 @@ z = reshape(I,2*N,1);
 % 
 
 %create anoynmous function
-f_min = @(x)v_stateUpdate(x,z,X,K);
+f_min = @(x)v_stateUpdate(x,z,X0,K,Q);
 
 %call nonlinear least squares
 options = optimoptions('lsqnonlin','Display','iter','Algorithm','levenberg-marquardt',...
-    'FunctionTolerance',1e-8);
+    'FunctionTolerance',1e-10);
 x_hat = lsqnonlin(f_min, x0,[],[],options);
 
 
 % %caculate final cost
 % J = (z - double(subs(h,x,x_hat)))'*Q*(z - double(subs(h,x,x_hat)));
-% 
-%generate new image
+
+%extract ls output
 pos_hat = x_hat(1:3);
 X_hat = X0 + reshape(x_hat(4:end),3,N);
 
-% 
-% %convert to cartesian coordinates
-% for ii = 1:N
-%     [X_hat(1,ii), X_hat(2,ii), X_hat(3,ii)] = invdept2cart(X_hat(1,ii), X_hat(2,ii), X_hat(3,ii));
-% end
-% 
+%convert to cartesian coordinates
+for ii = 1:N
+    [X_hat(1,ii), X_hat(2,ii), X_hat(3,ii)] = invdept2cart(X_hat(1,ii), X_hat(2,ii), X_hat(3,ii));
+    [X(1,ii), X(2,ii), X(3,ii)] = invdept2cart(X(1,ii), X(2,ii), X(3,ii));
+    [X0(1,ii), X0(2,ii), X0(3,ii)] = invdept2cart(X0(1,ii), X0(2,ii), X0(3,ii));
+end
 
 I_hat = imageGen(X_hat,pos_hat,R,K);
 scatter(I_hat(1,:),I_hat(2,:))
+legend('True','I Hat')
+
+%plot 3D scene
+figure
+scatter3(X(1,:),X(2,:),X(3,:))
+axis equal
+hold on
+scatter3(X_hat(1,:),X_hat(2,:),X_hat(3,:))
+scatter3(pos(1),pos(2),pos(3))
+scatter3(pos_hat(1),pos_hat(2),pos_hat(3))
+legend('True','Estimated','True Pos','Est Pos')
+xlabel('x')
+ylabel('y')
+zlabel('z')
+
+
+figure
+scatter3(X(1,:)-X_hat(1,:),X(2,:)-X_hat(2,:),X(3,:)-X_hat(3,:))
+hold on
+scatter3(X(1,:)-X0(1,:),X(2,:)-X0(2,:),X(3,:)-X0(3,:))
+legend('Estimate Error','Initial Error')
+xlabel('x')
+ylabel('y')
+zlabel('z')
+% axis equal
+
 
 
 
