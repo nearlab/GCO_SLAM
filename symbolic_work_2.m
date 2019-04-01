@@ -4,27 +4,46 @@ clc
 
 %lets take it nice and easy to figure this out
 
-%create real point X
-syms x y z 'real'
+A = sym('A',[3 4],'real');
 
-X = [x y z]';
 
-%camera attitude R
-R = eye(3);
+syms up vp xp yp zp u v q 'real'
 
-%camera position T
-syms t1 t2 t3 'real'
-T = [t1 t2 t3]';
+z = (A*[u v q 1]')';
 
-%create camera calibration matrix
-syms f px py 'real'
-K = [f 0 px;
-    0 f py;
-    0 0 1];
+up = z(1)/z(3);
 
-%create Measured Image
-I_meas = imageGen(X, T, R, K)
+vp = z(2)/z(3);
 
-%we are going to convert X from inverse depth to cartesian and back
-syms u v q 'real'
-[u, v, q] = cart2invdept(x,y,z);
+%% p2up/pu2
+puppu = diff(up,u);
+p2uppu2 = diff(puppu,u);
+
+p2uppu2 = subs(p2uppu2,u,0);
+p2uppu2 = subs(p2uppu2,v,0);
+p2uppu2 = subs(p2uppu2,q,1)
+
+%% p2up/pv2
+puppv = diff(up,v);
+p2uppv2 = diff(puppv,v);
+
+p2uppv2 = subs(p2uppv2,u,0);
+p2uppv2 = subs(p2uppv2,v,0);
+p2uppv2 = subs(p2uppv2,q,1)
+
+%% p2up/pq2
+puppq = diff(up,q);
+p2uppq2 = diff(puppq,q);
+
+p2uppq2 = subs(p2uppq2,u,0);
+p2uppq2 = subs(p2uppq2,v,0);
+p2uppq2 = subs(p2uppq2,q,1)
+
+%% p2vp/pu2
+pvppu = diff(vp,u);
+p2vppu2 = diff(pvppu,u);
+
+p2vppu2 = subs(p2vppu2,u,0);
+p2vppu2 = subs(p2vppu2,v,0);
+p2vppu2 = subs(p2vppu2,q,1)
+
