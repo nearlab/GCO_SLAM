@@ -3,20 +3,35 @@ function [G_star] = graphOpti(G)
 %document
 %   Input: G - graph
 %   Output: G_star - optimized graph
-v = bfsearch(G,1)
 
-%number of edges
-N = length(v) - 1;
+%calculate the minimum spanning tree
+G_min = minspantree(G);
 
-%initialize graph
-T = graph();
+%number of edges in G
+N = height(G.Edges);
 
-%loop to build new graph
-for i = 1:N
-    T = addedge(T,v(i),v(i+1));
+%number of egdes in G_min
+N_min = height(G_min.Edges);
+
+%check to see if loops are present
+if(N == N_min)
+    disp('Error: G already minimum span')
+    return
 end
 
-G_star = T;
+%initialize list of edges not in minspantree, f
+f = [];
+
+%find the edges which are no longer in the minimum spanning tree
+for i=1:N
+    a = G.Edges.EndNodes(i,:);
+    if(~ismember(a,G_min.Edges.EndNodes,'rows'))
+        f = [f; a];
+    end
+end
+
+%assign output
+G_star = G_min;
 
 end
 
