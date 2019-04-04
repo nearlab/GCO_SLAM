@@ -25,7 +25,7 @@ h = [x1 + x2; 2*x3 - x1; x3];
 x_true = [1 2 3]';
 
 %create covariance function
-Q1 = 10*[1 5 10;0 1 1; 0 0 1];
+Q1 = [1 0 0;0 10 0; 0 0 100];
 Q = Q1'*Q1;
 
 %create measurement
@@ -35,7 +35,7 @@ z = double(subs(h,x,x_true))+ mvnrnd(zeros(3,1),inv(Q))';
 x0 = x_true + .1*randn(length(x_true),1);
 
 %call function
-% [x_hat, ii, J_out, pChange] = LM(z, h, x0, Q, tol, maxIter);
+[x_hat, ii, J_out, pChange] = LM(z, h, x0, Q, tol, maxIter);
 
 % disp('LM Performance')
 % norm(x_hat - x_true)
@@ -71,4 +71,6 @@ X
 H = [1 1 0;-1 0 2; 0 0 1];
 
 x_ls = (H'*Q*H)^(-1)*H'*Q*z
+
+x_ls = (H'*H)^(-1)*H'*z
 
