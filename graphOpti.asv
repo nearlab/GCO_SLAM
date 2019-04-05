@@ -27,7 +27,7 @@ f_idx = [];
 for i=1:N
     a = G.Edges.EndNodes(i,:);
     if(~ismember(a,G_min.Edges.EndNodes,'rows'))
-        f = [f; a]
+        f = [f; a];
         f_idx = [f_idx; i];
     end
 end
@@ -36,12 +36,11 @@ end
 F = N-N_min;
 
 %intialize shortest path trees
-shortPath = cell(F,2);
+shortPath = cell(F,1);
 
 %calculate shortest path tree for each trimmed edge
 for i = 1:F
-    shortPath{i,1} = shortestpathtree(G_min,f(i,1),f(i,2));
-    shortPath{i,2} = shortestpath(G_min,f(i,1),f(i,2));
+    shortPath{i} = shortestpathtree(G_min,f(i,1),f(i,2));
 end
 
 %initialize shortest path cycle constraints
@@ -60,29 +59,16 @@ for i = 1:F
     %shortest path info for this edge
     s = shortPath{i}.Edges.s;
     endNodes = shortPath{i}.Edges.EndNodes;
-    R = shortPath{i}.Edges.R;
-    T = shortPath{i}.Edges.T;
+    R = shortPath{i}.Edges.s;
     
     %run through path to find cycle constraints
     for j = 1:L
         %check direction of edge
-        if(endNodes(j,1) < endNodes(j,2))
-            R_cycle = angle2dcm(R{i}(1),R{i}(2),R{i}(3),'XYZ')*R_cycle;
-            T_cycle = T_cycle + T{i}
-            s_cycle = s_cycle * s{i};
-        else
-            R_cycle = angle2dcm(R{i}(1),R{i}(2),R{i}(3),'XYZ')'*R_cycle;
-            T_cycle = T_cycle - T{i}
-            s_cycle = s_cycle / s{i};
-        end
-    end
-    
-    s_cycle
-    R_cycle
-    T_cycle
+        if(endNodes(j,1) < endNode(j,2))
+            R_cycle = R_cycle
 end
 %assign output
-G_star = shortPath{1};
+G_star = G_min;
 
 end
 
