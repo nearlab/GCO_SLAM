@@ -7,8 +7,8 @@ clc
 %initialize graph
 G = graph();
 G.Edges.s = {}; %scale
-G.Edges.R = {}; %XYZ euler angles for 123 rotation
-G.Edges.T = {}; %translation
+G.Edges.R = {}; %XYZ euler angles for 123 rotation (inertial to node)
+G.Edges.T = {}; %translation (inertial frame)
 G.Edges.Sig = {}; %covariance matrix
 G.Nodes.X = {};
 

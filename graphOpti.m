@@ -27,7 +27,7 @@ f_idx = [];
 for i=1:N
     a = G.Edges.EndNodes(i,:);
     if(~ismember(a,G_min.Edges.EndNodes,'rows'))
-        f = [f; a]
+        f = [f; a];
         f_idx = [f_idx; i];
     end
 end
@@ -58,31 +58,29 @@ for i = 1:F
     T_cycle = [0 0 0]';
     
     %shortest path info for this edge
-    s = shortPath{i}.Edges.s;
-    endNodes = shortPath{i}.Edges.EndNodes;
-    R = shortPath{i}.Edges.R;
-    T = shortPath{i}.Edges.T;
+    s = shortPath{i,1}.Edges.s;
+    endNodes = shortPath{i,1}.Edges.EndNodes;
+    R = shortPath{i,1}.Edges.R;
+    T = shortPath{i,1}.Edges.T;
     
     %run through path to find cycle constraints
-    for j = 1:L
+    for j = L:-1:1
         %check direction of edge
         if(endNodes(j,1) < endNodes(j,2))
-            R_cycle = angle2dcm(R{i}(1),R{i}(2),R{i}(3),'XYZ')*R_cycle;
-            T_cycle = T_cycle + T{i}
-            s_cycle = s_cycle * s{i};
+            R_cycle = angle2dcm(R{j}(1),R{j}(2),R{j}(3),'XYZ')*R_cycle;
+            T_cycle = T_cycle + T{j};
+            s_cycle = s_cycle * s{j};
         else
-            R_cycle = angle2dcm(R{i}(1),R{i}(2),R{i}(3),'XYZ')'*R_cycle;
-            T_cycle = T_cycle - T{i}
-            s_cycle = s_cycle / s{i};
+            R_cycle = angle2dcm(R{j}(1),R{j}(2),R{j}(3),'XYZ')'*R_cycle;
+            T_cycle = T_cycle - T{j};
+            s_cycle = s_cycle / s{j};
         end
     end
     
-    s_cycle
-    R_cycle
-    T_cycle
 end
 %assign output
-G_star = shortPath{1};
+G_star = shortPath{1,1};
+shortPath{1,2}
 
 end
 
