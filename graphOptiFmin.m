@@ -26,7 +26,7 @@ function [Likli] = graphOptiFmin(x,shortPath,local_e,local_f)
 % s(Rx + T). The second column contains covariance information according to
 % Sig = cov(mu,mu)
 %
-% local_f- a Nx2 cell array containing the prior of each edge in the
+% local_f- a Fx2 cell array containing the prior of each edge in the
 % removed in creating the minimum spanning tree. The first column contains
 % mean information according to mu = [s R1 R2 R3 T1 T2 T3] where s is a
 % scale, R is three angles in an 'XYZ' rotation, and T is a translation.

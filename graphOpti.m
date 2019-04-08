@@ -8,79 +8,124 @@ function [G_star] = graphOpti(G)
 G_min = minspantree(G);
 
 %number of edges in G
-N = height(G.Edges);
+N_total = height(G.Edges);
 
 %number of egdes in G_min
-N_min = height(G_min.Edges);
+N = height(G_min.Edges);
 
 %check to see if loops are present
-if(N == N_min)
+if(N_total == N)
     disp('Error: G already minimum span')
     return
 end
 
 %initialize list of edges not in minspantree, f
 f = [];
+e = [];
 f_idx = [];
+e_idx = [];
 
-%find the edges which are no longer in the minimum spanning tree
-for i=1:N
+%find the edges which are and arent in the minimum spanning tree
+for i=1:N_total
     a = G.Edges.EndNodes(i,:);
     if(~ismember(a,G_min.Edges.EndNodes,'rows'))
         f = [f; a];
         f_idx = [f_idx; i];
+    else
+        e = [e; a];
+        e_idx = [e_idx; i];
     end
 end
+f_idx
+
+e_idx
 
 %number of trimmed edges
-F = N-N_min;
+F = N_total-N;
 
 %intialize shortest path trees
-shortPath = cell(F,2);
+shortPath_nodes = cell(F,1);
 
 %calculate shortest path tree for each trimmed edge
 for i = 1:F
-    shortPath{i,1} = shortestpathtree(G_min,f(i,1),f(i,2));
-    shortPath{i,2} = shortestpath(G_min,f(i,1),f(i,2));
+    shortPath_nodes{i} = shortestpath(G_min,f(i,1),f(i,2));
 end
 
-%initialize shortest path cycle constraints
-cycleConts = cell(F,3);
+%initialize the shortPath
+shortPath = cell(F,1);
 
-%calculate cycle constraint
+%we need to convert from a node path to a edge path
 for i = 1:F
-    %find number of edges to complete path of i trimmed edge
-    L = height(shortPath{i}.Edges);
+    %find number of edges in cycle path for ith trimmed edge
+    Num_Cycle = length(shortPath_nodes{i})-1;
     
-    %initialize s, R, and T for the cycle
-    s_cycle = 1;
-    R_cycle = eye(3);
-    T_cycle = [0 0 0]';
-    
-    %shortest path info for this edge
-    s = shortPath{i,1}.Edges.s;
-    endNodes = shortPath{i,1}.Edges.EndNodes;
-    R = shortPath{i,1}.Edges.R;
-    T = shortPath{i,1}.Edges.T;
-    
-    %run through path to find cycle constraints
-    for j = L:-1:1
-        %check direction of edge
-        if(endNodes(j,1) < endNodes(j,2))
-            R_cycle = angle2dcm(R{j}(1),R{j}(2),R{j}(3),'XYZ')*R_cycle;
-            T_cycle = T_cycle + T{j};
-            s_cycle = s_cycle * s{j};
-        else
-            R_cycle = angle2dcm(R{j}(1),R{j}(2),R{j}(3),'XYZ')'*R_cycle;
-            T_cycle = T_cycle - T{j};
-            s_cycle = s_cycle / s{j};
+    %run through all the edges
+    for j = 1:Num_Cycle
+        %grab the endnodes for the jth edge
+        a = [shortPath_nodes{i}(j), shortPath_nodes{i}(j+1)];
+        
+        %look for a in e
+        ismember(a,e,'rows');
+        idx = find(ismember(e,a,'rows'));
+        
+        %check to see if the row was found
+        if(~isempty(idx)) %it was found
+            shortPath{i}(j) = idx;
+        else %not found, redo the search for the reverse
+            a = [a(2), a(1)];
+            idx = find(ismember(e,a,'rows'));
+            shortPath{i}(j) = -idx; %negative to signify edge in reverse
         end
     end
+end
+
+%initialize local_e
+local_e = cell(N,2);
+
+%initialize x
+x0 = [];
+
+%populate
+for i = 1:N
+    idx = e_idx(i);
+    s = G.Edges.s{idx};
+    R = G.Edges.R{idx};
+    T = G.Edges.R{idx};
+    sig = G.Edges.Sig{idx};
+    local_e{i,1} = [s R' T']';
+    local_e{i,2} = sig;
+    
+    %also initialize x
+    x0 = [x0' s R' T']';
     
 end
-%assign output
-G_star = shortPath{1,1};
-shortPath{1,2}
 
+x_true = x0;
+x0 = x0 + mvnrnd(zeros(length(x0),1),eye(length(x0)))';
+
+% initialize local_f
+local_f = cell(F,2);
+for i = 1:F
+    idx = f_idx(i);
+    s = G.Edges.s{idx};
+    R = G.Edges.R{idx};
+    T = G.Edges.R{idx};
+    sig = G.Edges.Sig{idx};
+    local_f{i,1} = [s R' T']';
+    local_f{i,2} = sig;
+end
+
+
+%run minimization
+fun4min = @(x) graphOptiFmin(x,shortPath,local_e,local_f);
+options = optimoptions('lsqnonlin','Display','iter','Algorithm','levenberg-marquardt',...
+    'FunctionTolerance',1e-8);
+x_hat = lsqnonlin(fun4min,x0,[],[],options);
+
+x0
+x_hat
+x_true
+%output
+G_star = G;
 end
 

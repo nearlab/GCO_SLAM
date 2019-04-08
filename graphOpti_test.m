@@ -56,11 +56,9 @@ EdgeProps.R{1} = [0 0 -pi/2]';
 EdgeProps.T{1} = [1 0 0]';
 G = addedge(G,1,4,EdgeProps);
 
-plot(G)
-
 %call function
 G_star = graphOpti(G);
 
-plot(G);
-hold on
-plot(G_star)
+% plot(G);
+% hold on
+% plot(G_star)
