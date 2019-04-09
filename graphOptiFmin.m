@@ -60,7 +60,8 @@ for i = 1:N
     sig = local_e{i,2};
     
     %calculate (ignore 1/2 term)
-    L_e_local_e(i) = (curr_x - mu)'*inv(sig)*(curr_x - mu);
+    L_e_local_e(i) = (curr_x - mu)'/sig*(curr_x - mu);
+%     (curr_x - mu)
 end
 
 %calculate the terms for L(path(f)|local_f)
@@ -91,9 +92,9 @@ for i = 1:F
             s_cycle = s_cycle * x_cell{k}(1);
         else
             k = -path(j); %edge index
-            R_cycle = angle2dcm(x_cell{k}(2),x_cell{k}(3),x_cell{k}(4),'XYZ')*R_cycle;
-            T_cycle = T_cycle + [x_cell{k}(5) x_cell{k}(6) x_cell{k}(7)]';
-            s_cycle = s_cycle * x_cell{k}(1);
+            R_cycle = angle2dcm(x_cell{k}(2),x_cell{k}(3),x_cell{k}(4),'XYZ')'*R_cycle;
+            T_cycle = T_cycle - [x_cell{k}(5) x_cell{k}(6) x_cell{k}(7)]';
+            s_cycle = s_cycle / x_cell{k}(1);
         end
     end
     
@@ -104,7 +105,7 @@ for i = 1:F
     curr_x = [s_cycle R1 R2 R3 T_cycle']';
     
     %calculate (ignore 1/2 term)
-    L_pathf(i) = (curr_x - mu)'*inv(sig)*(curr_x - mu);  
+    L_pathf(i) = (curr_x - mu)'/sig*(curr_x - mu);  
 end
     
 %finally, calculate the cost

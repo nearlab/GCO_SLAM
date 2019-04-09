@@ -59,6 +59,15 @@ G = addedge(G,1,4,EdgeProps);
 %call function
 G_star = graphOpti(G);
 
-% plot(G);
-% hold on
-% plot(G_star)
+%plot graph optimization
+N = size(G.Edges,1);
+X = zeros(3,N+1);
+
+for i = 1:N
+    a = G.Edges.EndNodes(i,:);
+    T = G.Edges.T{i};
+    X(:,a(2)) = X(:,a(1)) + T;
+end
+
+figure
+scatter(X(1,:),X(2,:))

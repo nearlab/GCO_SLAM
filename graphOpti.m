@@ -36,9 +36,6 @@ for i=1:N_total
         e_idx = [e_idx; i];
     end
 end
-f_idx
-
-e_idx
 
 %number of trimmed edges
 F = N_total-N;
@@ -90,7 +87,7 @@ for i = 1:N
     idx = e_idx(i);
     s = G.Edges.s{idx};
     R = G.Edges.R{idx};
-    T = G.Edges.R{idx};
+    T = G.Edges.T{idx};
     sig = G.Edges.Sig{idx};
     local_e{i,1} = [s R' T']';
     local_e{i,2} = sig;
@@ -101,7 +98,7 @@ for i = 1:N
 end
 
 x_true = x0;
-x0 = x0 + mvnrnd(zeros(length(x0),1),eye(length(x0)))';
+x0 = x0 + mvnrnd(zeros(length(x0),1),.1*eye(length(x0)))';
 
 % initialize local_f
 local_f = cell(F,2);
@@ -109,7 +106,7 @@ for i = 1:F
     idx = f_idx(i);
     s = G.Edges.s{idx};
     R = G.Edges.R{idx};
-    T = G.Edges.R{idx};
+    T = G.Edges.T{idx};
     sig = G.Edges.Sig{idx};
     local_f{i,1} = [s R' T']';
     local_f{i,2} = sig;
@@ -118,14 +115,25 @@ end
 
 %run minimization
 fun4min = @(x) graphOptiFmin(x,shortPath,local_e,local_f);
-options = optimoptions('lsqnonlin','Display','iter','Algorithm','levenberg-marquardt',...
-    'FunctionTolerance',1e-8);
+options = optimoptions('lsqnonlin','Display','none','Algorithm','levenberg-marquardt',...
+    'FunctionTolerance',1e-12);
 x_hat = lsqnonlin(fun4min,x0,[],[],options);
 
-x0
-x_hat
-x_true
 %output
 G_star = G;
+
+%place x_hat into G_star
+for i = 1:N
+    idx = (1:7) + 7*(i-1);
+    edge_idx = e_idx(i);
+    G_star.Edges.s{edge_idx} = x_hat(idx(1));
+    G_star.Edges.R{edge_idx} = x_hat(idx(2:4));
+    G_star.Edges.T{edge_idx} = x_hat(idx(5:7));
+end
+
+
+
+% x0
+x_hat-x_true
 end
 
