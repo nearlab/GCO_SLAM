@@ -97,9 +97,6 @@ for i = 1:N
     
 end
 
-x_true = x0;
-x0 = x0 + mvnrnd(zeros(length(x0),1),.1*eye(length(x0)))';
-
 % initialize local_f
 local_f = cell(F,2);
 for i = 1:F
@@ -131,9 +128,5 @@ for i = 1:N
     G_star.Edges.T{edge_idx} = x_hat(idx(5:7));
 end
 
-
-
-% x0
-x_hat-x_true
 end
 

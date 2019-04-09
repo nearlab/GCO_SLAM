@@ -61,7 +61,6 @@ for i = 1:N
     
     %calculate (ignore 1/2 term)
     L_e_local_e(i) = (curr_x - mu)'/sig*(curr_x - mu);
-%     (curr_x - mu)
 end
 
 %calculate the terms for L(path(f)|local_f)
