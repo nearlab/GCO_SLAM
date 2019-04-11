@@ -134,10 +134,14 @@ for i = 1:N
     G_star.Edges.T{edge_idx} = x_hat(idx(5:7));
 end
 
-%replace final side
-G_star.Edges.s{f_idx} = curr_x(1);
-G_star.Edges.R{f_idx} = curr_x(2:4);
-G_star.Edges.T{f_idx} = curr_x(5:7);
+%place curr_x into G_star
+for i = 1:F
+    idx = (1:7) + 7*(i-1);
+    edge_idx = f_idx(i);
+    G_star.Edges.s{edge_idx} = curr_x(idx(1));
+    G_star.Edges.R{edge_idx} = curr_x(idx(2:4));
+    G_star.Edges.T{edge_idx} = curr_x(idx(5:7));
+end
 
 end
 

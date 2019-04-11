@@ -64,7 +64,7 @@ for i = 1:N
 end
 
 %initialize curr_x_MAT
-curr_x_MAT = zeros(7,F);
+curr_x_MAT = zeros(7,
 %calculate the terms for L(path(f)|local_f)
 L_pathf = zeros(F,1);
 for i = 1:F
@@ -105,15 +105,13 @@ for i = 1:F
     %create current x
     curr_x = [s_cycle R1 R2 R3 T_cycle']';
     
-    curr_x_MAT(:,i) = curr_x;
+    get(curr_x_Ptr)
+    
+    curr_x_Ptr.Value = curr_x;
     
     %calculate (ignore 1/2 term)
     L_pathf(i) = (curr_x - mu)'/sig*(curr_x - mu);  
 end
-
-curr_x_MAT = [curr_x_MAT, curr_x_MAT];
-%export curr_x_MAT
-curr_x_Ptr.Value = curr_x_MAT;
     
 %finally, calculate the cost
 Likli = sum(L_e_local_e) + sum(L_pathf);
