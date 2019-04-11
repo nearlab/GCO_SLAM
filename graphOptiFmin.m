@@ -1,4 +1,4 @@
-function [Likli] = graphOptiFmin(x,shortPath,local_e,local_f)
+function [Likli] = graphOptiFmin(x,shortPath,local_e,local_f,curr_x_Ptr)
 %graphOptiFmin calculates the negative log liklihood in GCO SLAM. Function
 %to be minimized with lsqnonlin
 % 
@@ -102,6 +102,8 @@ for i = 1:F
     
     %create current x
     curr_x = [s_cycle R1 R2 R3 T_cycle']';
+    
+    curr_x_Ptr.Value = curr_x;
     
     %calculate (ignore 1/2 term)
     L_pathf(i) = (curr_x - mu)'/sig*(curr_x - mu);  

@@ -112,15 +112,12 @@ end
 %create current x dummy data
 curr_x = zeros(7,1);
 
-curr_x_Ptr = libpointer('doublePtr',curr_x);
+curr_x
 %run minimization
-fun4min = @(x) graphOptiFmin(x,shortPath,local_e,local_f,curr_x_Ptr);
+fun4min = @(x) graphOptiFmin(x,shortPath,local_e,local_f);
 options = optimoptions('lsqnonlin','Display','none','Algorithm','levenberg-marquardt',...
     'FunctionTolerance',1e-12);
 x_hat = lsqnonlin(fun4min,x0,[],[],options);
-
-%grab current x for last side
-curr_x = curr_x_Ptr.Value;
 
 %output
 G_star = G;
@@ -133,11 +130,6 @@ for i = 1:N
     G_star.Edges.R{edge_idx} = x_hat(idx(2:4));
     G_star.Edges.T{edge_idx} = x_hat(idx(5:7));
 end
-
-%replace final side
-G_star.Edges.s{f_idx} = curr_x(1);
-G_star.Edges.R{f_idx} = curr_x(2:4);
-G_star.Edges.T{f_idx} = curr_x(5:7);
 
 end
 
