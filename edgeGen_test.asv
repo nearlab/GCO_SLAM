@@ -21,7 +21,7 @@ sig_z = .25;
 
 sig_s = .1;
 sig_R = .1*eye(3);
-sig_T = .1*eye(3);
+sig_T = .1*eye(3)
 %generate random points
 X_I = zeros(N,3); %points in inertial frame
 for ii = 1:N
@@ -37,16 +37,12 @@ T_true = [1 .5 1]';
 for jj = 1:1000
     
 %generate noisey s, R, and T
-x_noise = mvnrnd([s_true angle_true' T_true'],blkdiag(sig_s,sig_R,sig_T))';
-
-s_rand = x_noise(1);
-R_rand = angle2dcm(x_noise(2),x_noise(3),x_noise(4),'XYZ');
-T_rand = x_noise(5:7);
+x_noise = mvnrnd([s_true angle_true' T_true'],blkdiag(sig_s,sig_R,sig_T));
 
 %map points to transformed frame
 X_R = zeros(N,3);
 for ii = 1:N
-    X_R(ii,:) = (s_rand*(R_rand*X_I(ii,:)' + T_rand))';
+    X_R(ii,:) = (s_true*(R_true*X_I(ii,:)' + T_true))';
 end
 
 %add some noise
